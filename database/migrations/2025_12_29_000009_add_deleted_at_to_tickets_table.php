@@ -11,14 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('equiment_types', function (Blueprint $table) {
-            $table->id();
-
-            $table->string('name')
-                  ->nullable()
-                  ->comment('Name of the equipment type');
-            
-            $table->timestamps();
+        Schema::table('tickets', function (Blueprint $table) {
+            $table->softDeletes();
         });
     }
 
@@ -27,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('equiment_types');
+        Schema::table('tickets', function (Blueprint $table) {
+            //
+        });
     }
 };

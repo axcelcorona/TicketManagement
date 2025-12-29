@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             // Relacion de los tickets con los usuarios
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
 
             // Informacion General del ticket
             $table->string('client_name')
@@ -64,9 +64,9 @@ return new class extends Migration
 
             // Relaciones con otros modelos
 
-            $table->foreignId('equiment_id')
+            $table->foreignId('equipment_id')
                   ->nullable()
-                  ->constrained('equiments')
+                  ->constrained('equipments')
                   ->onDelete('set null')
                   ->comment('Reference to the equipment related to the ticket');
             

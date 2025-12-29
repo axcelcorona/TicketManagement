@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('equiments', function (Blueprint $table) {
+        Schema::create('equipments', function (Blueprint $table) {
             $table->id();
 
             $table->string('brand')
@@ -29,6 +29,12 @@ return new class extends Migration
             $table->string('code')
                   ->nullable()
                   ->comment('Internal code of the equipment');
+
+            $table->foreignId('equipment_type_id')
+                  ->nullable()
+                  ->constrained('equipment_types')
+                  ->onDelete('set null')
+                  ->comment('Reference to the type of equipment');
                   
             $table->timestamps();
         });
