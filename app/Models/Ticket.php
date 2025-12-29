@@ -13,7 +13,8 @@ class Ticket extends Model
     use SoftDeletes;
     //
     protected $table = 'tickets';
-    protected $fillable = ['client_name',
+    protected $fillable = ['user_id',
+                           'client_name',
                            'owner_name',
                            'client_email', 
                            'call_time',
@@ -50,12 +51,10 @@ class Ticket extends Model
         });
     }
 
-    public function supportStaffs(): BelongsToMany
+    public function supportStaff(): BelongsToMany
     {
-        return $this->belongsToMany(SupportStaff::class, 
-                                    'ticket_support_staff', 
-                                    'ticket_id', 
-                                    'support_staff_id')
-                    ->withTimestamps();
+        return $this->belongsToMany(SupportStaff::class, 'ticket_support_staff',
+        'ticket_id',
+        'support_staff_id')->withTimestamps();
     }
 }

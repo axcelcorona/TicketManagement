@@ -13,6 +13,6 @@ class SupportStaff extends Model
 
     public function tickets(): BelongsToMany
     {
-        return $this->belongsToMany(Ticket::class);
+        return $this->belongsToMany(Ticket::class, 'ticket_support_staff')->withTimestamps();
     }
 }

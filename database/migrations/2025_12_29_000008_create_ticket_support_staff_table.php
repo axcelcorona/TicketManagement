@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ticket_support_staff', function (Blueprint $table) {
-            $table->id();
 
             $table->foreignId('ticket_id')
                   ->constrained('tickets')
@@ -24,6 +23,9 @@ return new class extends Migration
                   ->onDelete('cascade')
                   ->comment('Reference to the support staff member');      
 
+
+            $table->primary(['ticket_id', 'support_staff_id']);
+                  
             $table->timestamps();
         });
     }

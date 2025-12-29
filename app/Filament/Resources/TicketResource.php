@@ -9,7 +9,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 
 class TicketResource extends Resource
 {
@@ -40,13 +39,15 @@ class TicketResource extends Resource
                     Forms\Components\DateTimePicker::make('start_time')->label('Fecha y Hora de Inicio'),
                     Forms\Components\DateTimePicker::make('end_time')->label('Fecha y Hora de Fin'),
                     Forms\Components\Select::make('status')
-                    ->label('Estado')
-                    ->options([
-                        'Open' => 'Open',
-                        'Closed' => 'Closed',
-                    ])
-                    ->default('Open')
-                    ->hidden(fn ($livewire) => $livewire instanceof Pages\CreateTicket),
+                        ->label('Estado')
+                        ->options([
+                            'open'   => 'Abierto',
+                            'closed' => 'Cerrado',
+                        ])
+                        ->required()
+                        ->rules(['required'])
+                        ->default(fn ($record) => $record?->status ?? 'open')
+                        ->hidden(fn ($livewire) => $livewire instanceof Pages\CreateTicket),
                     Forms\Components\TextInput::make('location')
                         ->label('Ubicación')
                         ->maxLength(255),
@@ -123,10 +124,11 @@ class TicketResource extends Resource
             ])
             ->filters([
                 //
-                Tables\Filters\SelectFilter::make('status')->options([
-                    'Open' => 'Open',
-                    'Closed' => 'Closed',
-                ]),
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                            'open'   => 'Abierto',
+                            'closed' => 'Cerrado',
+                        ]),
                 Tables\Filters\SelectFilter::make('visit_type_id')->relationship('visitType', 'name'),
                 Tables\Filters\TrashedFilter::make('client_name'),
 
