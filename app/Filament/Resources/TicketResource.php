@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
 use App\Models\Ticket;
+use Filament\Tables\Actions\Action;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -129,13 +131,35 @@ class TicketResource extends Resource
                             'open'   => 'Abierto',
                             'closed' => 'Cerrado',
                         ]),
-                Tables\Filters\SelectFilter::make('visit_type_id')->relationship('visitType', 'name'),
-                Tables\Filters\TrashedFilter::make('client_name'),
+                
+                Tables\Filters\SelectFilter::make('visit_type_id')
+                    ->label('Tipo de Visita')
+                    ->relationship('visitType', 'name'),
+                
+                // Tables\Filters\SelectFilter::make('client_name')
+                //     ->label('Nombre del Cliente'),
 
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Action::make('download_pdf')
+                    ->label('Descargar PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->action(function (Ticket $record) {
+
+                        $pdf = Pdf::loadView('pdf.ticket', [
+                            'ticket' => $record->load([
+                                'visitType',
+                                'supportStaff',
+                            ]),
+                        ]);
+
+                        return response()->streamDownload(
+                            fn () => print($pdf->output()),
+                            "ticket_{$record->id}.pdf"
+                        );
+                    }),
             ]);
             // ->bulkActions([
             //     Tables\Actions\BulkActionGroup::make([
