@@ -9,6 +9,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Illuminate\Support\Str;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -155,9 +156,13 @@ class TicketResource extends Resource
                             ]),
                         ]);
 
+                        $clientName = Str::slug($record->client_name ?: 'cliente', '_');
+                        $currentDate = now()->format('Y-m-d');
+                        $filename = "{$clientName}_{$record->id}_{$currentDate}.pdf";
+
                         return response()->streamDownload(
                             fn () => print($pdf->output()),
-                            "ticket_{$record->id}.pdf"
+                            $filename
                         );
                     }),
             ]);

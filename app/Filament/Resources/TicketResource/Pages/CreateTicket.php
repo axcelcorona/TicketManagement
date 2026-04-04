@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\TicketResource\Pages;
 
 use App\Filament\Resources\TicketResource;
+use App\Mail\TicketCreatedMail;
 use App\Models\Equipment;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CreateTicket extends CreateRecord
 {
@@ -30,6 +33,36 @@ class CreateTicket extends CreateRecord
             $this->record
                 ->supportStaff()
                 ->sync($this->data['supportStaff']);
+        }
+
+        $recipient = $this->record->client_email ?: Auth::user()?->email;
+
+        if (! $recipient) {
+            Log::warning('TicketCreatedMail: no hay destinatario para el ticket #' . $this->record->id);
+            return;
+        }
+
+        $referenceNumber = 'INC-' . str_pad((string) $this->record->id, 6, '0', STR_PAD_LEFT);
+
+        try {
+            Mail::to($recipient)->send(
+                new TicketCreatedMail(
+                    $this->record->load(['visitType', 'equipment', 'supportStaff']),
+                    $referenceNumber
+                )
+            );
+
+            Log::info('TicketCreatedMail enviado', [
+                'ticket_id'  => $this->record->id,
+                'referencia' => $referenceNumber,
+                'destinatario' => $recipient,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('TicketCreatedMail ERROR al enviar', [
+                'ticket_id' => $this->record->id,
+                'destinatario' => $recipient,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }
