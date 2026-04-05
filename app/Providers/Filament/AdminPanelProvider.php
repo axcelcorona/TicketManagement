@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName(fn (): string => auth()->user()?->name ?? config('app.name'))
             ->profile(EditProfile::class, isSimple: true)
             ->colors([
                 'primary' => Color::Amber,
