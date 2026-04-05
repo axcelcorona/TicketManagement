@@ -17,10 +17,13 @@ class UserSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Axcel Coronado',
+        $user = User::query()->firstOrCreate([
             'email' => 'axcelcorona01@gmail.com',
+        ], [
+            'name' => 'Axcel Coronado',
             'password' => bcrypt(env('ADMIN_PASSWORD')),
         ]);
+
+        $user->assignRole('super_admin');
     }
 }

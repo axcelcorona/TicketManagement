@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\ChartWidget;
 
 class TicketsMonthlyTrendChart extends ChartWidget
@@ -10,6 +11,11 @@ class TicketsMonthlyTrendChart extends ChartWidget
     protected static ?string $heading = 'Tendencia de Tickets (Ultimos 6 Meses)';
 
     protected static ?int $sort = 3;
+
+    protected function getTicketQuery(): Builder
+    {
+        return Ticket::query()->visibleTo(auth()->user());
+    }
 
     protected function getData(): array
     {
@@ -19,14 +25,14 @@ class TicketsMonthlyTrendChart extends ChartWidget
         foreach (range(5, 0) as $monthsAgo) {
             $date = now()->subMonths($monthsAgo);
             $labels[] = $date->translatedFormat('M Y');
-            $values[] = Ticket::query()
+            $values[] = $this->getTicketQuery()
                 ->whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->count();
         }
 
         $labels[] = now()->translatedFormat('M Y');
-        $values[] = Ticket::query()
+        $values[] = $this->getTicketQuery()
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count();

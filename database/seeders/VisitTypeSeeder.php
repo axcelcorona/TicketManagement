@@ -15,12 +15,15 @@ class VisitTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        VisitType::Insert([
-            ['name' => 'Visita de Llamada' , 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Visita Programada' , 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Visita Especial'  , 'created_at' => now(), 'updated_at' => now()]
-        ]);
+        collect([
+            'Visita de Llamada',
+            'Visita Programada',
+            'Visita Especial',
+        ])->each(function (string $name): void {
+            VisitType::query()->updateOrCreate(
+                ['name' => $name],
+                ['name' => $name]
+            );
+        });
     }
 }

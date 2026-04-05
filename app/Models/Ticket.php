@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -56,5 +57,16 @@ class Ticket extends Model
         return $this->belongsToMany(SupportStaff::class, 'ticket_support_staff',
         'ticket_id',
         'support_staff_id')->withTimestamps();
+    }
+
+    public function scopeVisibleTo(Builder $query, ?User $user = null): Builder
+    {
+        $user ??= Auth::user();
+
+        if (! $user || $user->isAdmin()) {
+            return $query;
+        }
+
+        return $query->where('user_id', $user->id);
     }
 }

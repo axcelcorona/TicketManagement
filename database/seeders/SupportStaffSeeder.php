@@ -15,30 +15,27 @@ class SupportStaffSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        SupportStaff::insert([
+        collect([
             [
                 'name' => 'Brina Gonzales',
                 'phone' => '13213321',
                 'email' => 'brina.gonzales@example.com',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Axcel Coronado',
                 'phone' => '63221196',
                 'email' => 'axcel.coronado@example.com',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Edwin Coronado',
                 'phone' => '64500333',
                 'email' => 'edwin.coronado@example.com',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
+            ],
+        ])->each(function (array $staff): void {
+            SupportStaff::query()->updateOrCreate(
+                ['email' => $staff['email']],
+                $staff
+            );
+        });
     }
 }

@@ -3,17 +3,23 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class TicketStatsOverview extends StatsOverviewWidget
 {
+    protected function getTicketQuery(): Builder
+    {
+        return Ticket::query()->visibleTo(auth()->user());
+    }
+
     protected function getStats(): array
     {
-        $total = Ticket::query()->count();
-        $open = Ticket::query()->where('status', 'open')->count();
-        $closed = Ticket::query()->where('status', 'closed')->count();
-        $thisMonth = Ticket::query()
+        $total = $this->getTicketQuery()->count();
+        $open = $this->getTicketQuery()->where('status', 'open')->count();
+        $closed = $this->getTicketQuery()->where('status', 'closed')->count();
+        $thisMonth = $this->getTicketQuery()
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();

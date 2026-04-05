@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\VisitType;
+use App\Models\Ticket;
 use Filament\Widgets\ChartWidget;
 
 class TicketsByVisitTypeChart extends ChartWidget
@@ -13,20 +13,23 @@ class TicketsByVisitTypeChart extends ChartWidget
 
     protected function getData(): array
     {
-        $rows = VisitType::query()
-            ->withCount('tickets')
-            ->orderByDesc('tickets_count')
+        $rows = Ticket::query()
+            ->visibleTo(auth()->user())
+            ->selectRaw('visit_type_id, COUNT(*) as total')
+            ->with('visitType')
+            ->groupBy('visit_type_id')
+            ->orderByDesc('total')
             ->get();
 
         return [
             'datasets' => [
                 [
                     'label' => 'Tickets',
-                    'data' => $rows->pluck('tickets_count')->all(),
+                    'data' => $rows->pluck('total')->all(),
                     'backgroundColor' => '#6366f1',
                 ],
             ],
-            'labels' => $rows->pluck('name')->all(),
+            'labels' => $rows->map(fn (Ticket $ticket): string => $ticket->visitType?->name ?? 'Sin tipo')->all(),
         ];
     }
 

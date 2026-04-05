@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TicketResource\Pages;
 use App\Models\Ticket;
+use App\Models\VisitType;
 use Filament\Tables\Actions\Action;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -18,6 +20,8 @@ class TicketResource extends Resource
     protected static ?string $model = Ticket::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?string $navigationLabel = 'Tickets';
 
     public static function form(Form $form): Form
     {
@@ -76,21 +80,19 @@ class TicketResource extends Resource
 
                 Forms\Components\Section::make()->label('Tipo de Visita')->schema([
                     Forms\Components\Select::make('visit_type_id')
-                        ->relationship('visitType', 'name')
+                        ->options(fn () => VisitType::query()->orderBy('name')->pluck('name', 'id')->all())
                         ->label('Tipo de Visita')
                         ->live()
+                        ->searchable()
+                        ->preload()
                         ->required(),
                 ])->columns(1),
 
                Forms\Components\Section::make('Personal de soporte')->schema([
                     Forms\Components\Select::make('supportStaff')
                     ->label('Personal de soporte')
+                    ->relationship('supportStaff', 'name')
                     ->multiple()
-                    ->options(
-                        \App\Models\SupportStaff::query()
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                    )
                     ->searchable()
                     ->preload()
                     ->placeholder('Buscar y seleccionar especialistas')
@@ -121,6 +123,10 @@ class TicketResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')->sortable(),
                 Tables\Columns\TextColumn::make('client_name')->searchable(), 
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('Creado por')
+                    ->toggleable()
+                    ->visible(fn (): bool => auth()->user()?->isAdmin() ?? false),
                 Tables\Columns\TextColumn::make('visitType.name')->label('Visita')->badge(),
                 Tables\Columns\TextColumn::make('status')->badge(),
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->sortable(),
@@ -171,6 +177,13 @@ class TicketResource extends Resource
             //         Tables\Actions\DeleteBulkAction::make(),
             //     ]),
             // ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['user', 'visitType'])
+            ->visibleTo(auth()->user());
     }
 
     public static function getRelations(): array

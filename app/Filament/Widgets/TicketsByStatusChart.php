@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Ticket;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\ChartWidget;
 
 class TicketsByStatusChart extends ChartWidget
@@ -11,10 +12,15 @@ class TicketsByStatusChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
+    protected function getTicketQuery(): Builder
+    {
+        return Ticket::query()->visibleTo(auth()->user());
+    }
+
     protected function getData(): array
     {
-        $open = Ticket::query()->where('status', 'open')->count();
-        $closed = Ticket::query()->where('status', 'closed')->count();
+        $open = $this->getTicketQuery()->where('status', 'open')->count();
+        $closed = $this->getTicketQuery()->where('status', 'closed')->count();
 
         return [
             'datasets' => [
